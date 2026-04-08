@@ -1,0 +1,5 @@
+<App title="External Logic Test">
+    <QLineEdit name="username_field" placeholder="Enter text..." />
+    <QPushButton text="Run External Logic" action="handle_click" />
+    <QLineEdit name="out_field" placeholder="" />
+</App>
