@@ -1,49 +1,89 @@
-<App title="PyQt6 Master Demo">
+<App title="PyQt6 Master Demo - Extended Edition">
     <Import name="logic" path="./test-ui/logic.py" />
     <Layout type="Grid">
 
-        <QGroupBox title="Registration Form" row="0" col="0">
-            <QLabel text="Username:" />
-            <QLineEdit name="user_in" />
-            <QPushButton text="Register" />
-            <QLabel name="status_label" text="Ready to process..." />
+        <QGroupBox title="Input Controls" row="0" col="0">
+            <QLabel text="Standard Input:" />
+            <QLineEdit name="user_in" placeholderText="Enter username..." />
+
+            <QLabel text="Secure Input:" />
+            <QLineEdit name="pass_in" echoMode="Password" />
+
+            <QLabel text="Multi-line Text:" />
+            <QTextEdit name="bio_editor" placeholderText="Write a short bio..." />
+
+            <QPushButton text="Register User" action="logic.handle_registration" />
+            <QLabel name="status_label" text="Status: Waiting..." />
         </QGroupBox>
 
-        <QGroupBox title="Selection Lists" row="0" col="1">
-            <QListWidget name="my_list">
-                <Item text="Option 1: Basic" />
-                <Item text="Option 2: Pro" />
-                <Item text="Option 3: Enterprise" />
-            </QListWidget>
-            <QGroupBox title="Nested Group">
-                <QPushButton text="Nested Button" action="logic.show_info" />
+        <QGroupBox title="Selection and Values" row="0" col="1">
+            <QLabel text="Dropdown Menu:" />
+            <QComboBox name="category_select">
+                <Item text="Hardware" />
+                <Item text="Software" />
+                <Item text="Services" />
+            </QComboBox>
+
+            <QLabel text="Number Spinners (Int and Double):" />
+            <QSpinBox name="age_spin" min="0" max="120" value="25" />
+            <QDoubleSpinBox name="price_spin" min="0.0" max="99.9" step="0.5" />
+
+            <QLabel text="Date and Time Selection:" />
+            <QDateTimeEdit name="timestamp" calendarPopup="True" />
+
+            <QCheckBox name="agree_check" text="Accept Terms and Conditions" />
+
+            <QGroupBox title="Radio Options">
+                <QRadioButton name="radio_1" text="Option A" checked="True" />
+                <QRadioButton name="radio_2" text="Option B" />
             </QGroupBox>
         </QGroupBox>
 
         <QTabWidget name="tabs" row="1" col="0" colSpan="2">
-            <Tab title="Tree Hierarchy">
-                <QTreeWidget name="file_browser" headers="Name,Type,Size">
-                    <Item values="Documents,Folder,--">
-                        <Item values="Resume.pdf,PDF,1.2MB" />
-                        <Item values="Budget.xlsx,Spreadsheet,450KB" />
 
-                        <Item values="Photos,Folder,--">
-                            <Item values="Vacation.jpg,Image,4MB" />
-                            <Item values="Profile.png,Image,2MB" />
+            <Tab title="Data Views (Tree, List)">
+                    <QTreeWidget name="file_browser" headers="Name,Type,Size">
+                        <Item values="Project,Folder,--">
+                            <Item values="main.py,Python,4KB" />
+                            <Item values="styles.qss,CSS,1KB" />
                         </Item>
-                    </Item>
+                        <Item values="System,Folder,--">
+                            <Item values="config.ini,Settings,1KB" />
+                        </Item>
+                    </QTreeWidget>
 
-                    <Item values="System,Folder,--">
-                        <Item values="config.ini,Settings,1KB" />
-                    </Item>
-                </QTreeWidget>
+                    <QListWidget name="my_list">
+                        <Item text="Priority: High" />
+                        <Item text="Priority: Medium" />
+                        <Item text="Priority: Low" />
+                    </QListWidget>
             </Tab>
-            <Tab title="System Monitor">
-                <QLCDNumber name="main_display" value="85" />
-                <QProgressBar value="85" />
-                <QPushButton text="Make Tabs Closable" action="logic.set_closable" />
-                <QPushButton text="Make Tabs Unclosable" action="logic.set_unclosable" />
+
+            <Tab title="System and Feedback">
+                <QLabel text="System Load:" />
+                <QLCDNumber name="main_display" value="85" digitCount="2" />
+                <QProgressBar name="progress_bar" value="85" />
+
+                <QLabel text="Volume/Intensity Slider:" />
+                <QSlider min="0" max="100" value="50" />
+
+                <Layout type="Horizontal">
+                    <QPushButton text="Enable Closable Tabs" action="logic.set_closable" />
+                    <QPushButton text="Disable Closable Tabs" action="logic.set_unclosable" />
+                </Layout>
             </Tab>
+
+            <Tab title="Rich Content">
+                <QScrollArea>
+                    <QGroupBox title="Scrollable Zone">
+                        <QLabel text="Calendar Widget:" />
+                        <QCalendarWidget name="main_calendar" />
+                        <QFontComboBox name="font_picker" />
+                        <QPushButton text="Generic Action" action="logic.show_info" />
+                    </QGroupBox>
+                </QScrollArea>
+            </Tab>
+
         </QTabWidget>
 
     </Layout>
