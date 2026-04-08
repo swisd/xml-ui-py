@@ -1,82 +1,98 @@
 import sys
-import os
 import importlib.util
 import xml.etree.ElementTree as ET
-from PyQt6 import QtWidgets
+from PyQt6 import QtWidgets, QtCore
 
 
 class XMLGui(QtWidgets.QWidget):
-    def __init__(self, xml_string, logic_module=None):
+    def __init__(self, xml_string):
         super().__init__()
-        self.layout = QtWidgets.QVBoxLayout()
-        self.setLayout(self.layout)
         self.widgets = {}
-        self.logic = logic_module  # Our "Code-behind"
+        self.modules = {}  # Stores imported python files
         self.parse_xml(xml_string)
+    
+    def _load_module(self, name, path):
+        """Helper to dynamically import a file."""
+        try:
+            spec = importlib.util.spec_from_file_location(name, path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            self.modules[name] = mod
+        except Exception as e:
+            print(f"Failed to import {name} from {path}: {e}")
     
     def parse_xml(self, xml_string):
         root = ET.fromstring(xml_string)
         self.setWindowTitle(root.attrib.get('title', 'XML App'))
         
-        for element in root:
+        # 1. Process Imports first
+        for imp in root.findall('Import'):
+            name = imp.attrib.get('name')
+            path = imp.attrib.get('path')
+            if name and path:
+                self._load_module(name, path)
+        
+        # 2. Setup Layout
+        layout = QtWidgets.QGridLayout() if root.tag == "GridLayout" else QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+        
+        # 3. Build UI (skipping Import tags)
+        self.build_ui(root, layout)
+    
+    def build_ui(self, parent_element, layout):
+        for element in parent_element:
+            if element.tag == "Import": continue
+            
             tag_name = element.tag
             attrs = element.attrib
             
-            # Lookup widget class in QtWidgets
             widget_class = getattr(QtWidgets, tag_name, None)
+            if not widget_class: continue
             
-            if widget_class:
-                widget = widget_class()
+            widget = widget_class()
+            
+            # Attribute Mapping
+            for key, value in attrs.items():
+                if key in ['row', 'col', 'rowSpan', 'colSpan', 'action', 'name']: continue
                 
-                # Apply attributes
-                if 'text' in attrs and hasattr(widget, 'setText'):
-                    widget.setText(attrs['text'])
-                if 'placeholder' in attrs and hasattr(widget, 'setPlaceholderText'):
-                    widget.setPlaceholderText(attrs['placeholder'])
-                
-                # Dynamic Event Binding
-                if 'action' in attrs and hasattr(widget, 'clicked'):
-                    action_name = attrs['action']
-                    # Look for the function in the external logic module first,
-                    # then fall back to this class
-                    callback = getattr(self.logic, action_name, getattr(self, action_name, None))
-                    
-                    if callback:
-                        # Pass 'self' (the UI) so the logic script can access widgets
+                setter = getattr(widget, f"set{key[0].upper()}{key[1:]}", None)
+                if setter:
+                    if value.lower() == 'true':
+                        value = True
+                    elif value.lower() == 'false':
+                        value = False
+                    elif value.isdigit():
+                        value = int(value)
+                    try:
+                        setter(value)
+                    except:
+                        pass
+            
+            # Scoped Action Binding (e.g., action="my_logic.submit")
+            if 'action' in attrs:
+                action_path = attrs['action'].split('.')
+                if len(action_path) == 2:
+                    mod_name, func_name = action_path
+                    mod = self.modules.get(mod_name)
+                    callback = getattr(mod, func_name, None)
+                    if callback and hasattr(widget, 'clicked'):
                         widget.clicked.connect(lambda checked, cb=callback: cb(self))
-                
-                # Store by name for easy access via self.widgets['name']
-                name = attrs.get('name')
-                if name:
-                    self.widgets[name] = widget
-                
-                self.layout.addWidget(widget)
-
-
-def load_logic_file(path):
-    """Dynamically imports a python file as a module."""
-    module_name = "custom_logic"
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+            
+            # Grid Logic
+            if isinstance(layout, QtWidgets.QGridLayout):
+                r, c = int(attrs.get('row', 0)), int(attrs.get('col', 0))
+                rs, cs = int(attrs.get('rowSpan', 1)), int(attrs.get('colSpan', 1))
+                layout.addWidget(widget, r, c, rs, cs)
+            else:
+                layout.addWidget(widget)
+            
+            if 'name' in attrs:
+                self.widgets[attrs['name']] = widget
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python main.py <ui.xml> <logic.py>")
-        sys.exit(1)
-    
-    xml_path = sys.argv[1]
-    logic_path = sys.argv[2]
-    
-    # Load files
-    with open(xml_path, 'r') as f:
-        xml_data = f.read()
-    
-    logic_mod = load_logic_file(logic_path)
-    
-    app = QtWidgets.QApplication(sys.argv)
-    window = XMLGui(xml_data, logic_mod)
-    window.show()
-    sys.exit(app.exec())
+    with open(sys.argv[1], 'r') as f:
+        app = QtWidgets.QApplication(sys.argv)
+        window = XMLGui(f.read())
+        window.show()
+        sys.exit(app.exec())

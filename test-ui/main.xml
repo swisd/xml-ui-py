@@ -1,5 +1,14 @@
-<App title="External Logic Test">
-    <QLineEdit name="username_field" placeholder="Enter text..." />
-    <QPushButton text="Run External Logic" action="handle_click" />
-    <QLineEdit name="out_field" placeholder="" />
-</App>
+<GridLayout title="Modular XML UI">
+    <Import name="auth" path="test-ui\logic_auth.py" />
+    <Import name="utils" path="test-ui\logic_utils.py" />
+
+    <QLabel text="System Login" row="0" col="0" colSpan="2" alignment="AlignCenter" />
+
+    <QLabel text="User:" row="1" col="0" />
+    <QLineEdit name="user_field" row="1" col="1" />
+
+    <QPushButton text="Login" action="auth.verify" row="2" col="1" />
+    <QPushButton text="Clear" action="utils.reset_form" row="2" col = "0" />
+
+    <QLabel name="status" text="Waiting..." row="3" col="0" colSpan="2" />
+</GridLayout>
