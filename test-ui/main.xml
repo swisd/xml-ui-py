@@ -1,14 +1,50 @@
-<GridLayout title="Modular XML UI">
-    <Import name="auth" path="test-ui\logic_auth.py" />
-    <Import name="utils" path="test-ui\logic_utils.py" />
+<App title="PyQt6 Master Demo">
+    <Import name="logic" path="./test-ui/logic.py" />
+    <Layout type="Grid">
 
-    <QLabel text="System Login" row="0" col="0" colSpan="2" alignment="AlignCenter" />
+        <QGroupBox title="Registration Form" row="0" col="0">
+            <QLabel text="Username:" />
+            <QLineEdit name="user_in" />
+            <QPushButton text="Register" />
+            <QLabel name="status_label" text="Ready to process..." />
+        </QGroupBox>
 
-    <QLabel text="User:" row="1" col="0" />
-    <QLineEdit name="user_field" row="1" col="1" />
+        <QGroupBox title="Selection Lists" row="0" col="1">
+            <QListWidget name="my_list">
+                <Item text="Option 1: Basic" />
+                <Item text="Option 2: Pro" />
+                <Item text="Option 3: Enterprise" />
+            </QListWidget>
+            <QGroupBox title="Nested Group">
+                <QPushButton text="Nested Button" action="logic.show_info" />
+            </QGroupBox>
+        </QGroupBox>
 
-    <QPushButton text="Login" action="auth.verify" row="2" col="1" />
-    <QPushButton text="Clear" action="utils.reset_form" row="2" col = "0" />
+        <QTabWidget name="tabs" row="1" col="0" colSpan="2">
+            <Tab title="Tree Hierarchy">
+                <QTreeWidget name="file_browser" headers="Name,Type,Size">
+                    <Item values="Documents,Folder,--">
+                        <Item values="Resume.pdf,PDF,1.2MB" />
+                        <Item values="Budget.xlsx,Spreadsheet,450KB" />
 
-    <QLabel name="status" text="Waiting..." row="3" col="0" colSpan="2" />
-</GridLayout>
+                        <Item values="Photos,Folder,--">
+                            <Item values="Vacation.jpg,Image,4MB" />
+                            <Item values="Profile.png,Image,2MB" />
+                        </Item>
+                    </Item>
+
+                    <Item values="System,Folder,--">
+                        <Item values="config.ini,Settings,1KB" />
+                    </Item>
+                </QTreeWidget>
+            </Tab>
+            <Tab title="System Monitor">
+                <QLCDNumber name="main_display" value="85" />
+                <QProgressBar value="85" />
+                <QPushButton text="Make Tabs Closable" action="logic.set_closable" />
+                <QPushButton text="Make Tabs Unclosable" action="logic.set_unclosable" />
+            </Tab>
+        </QTabWidget>
+
+    </Layout>
+</App>
