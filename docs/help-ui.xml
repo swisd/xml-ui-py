@@ -1,0 +1,37 @@
+<App title="Documentation Browser">
+    <Import name="logic" path="./docs/help.py" />
+
+    <Layout type="Grid">
+
+        <QGroupBox title="Contents" row="0" col="0" width="300">
+            <Layout type="Vertical">
+                <QLineEdit name="search_filter" placeholderText="Filter topics..." action="logic.filter_tree" />
+
+                <QTreeWidget name="help_tree" headers="Documentation Structure">
+                    <Item values="Loading Library..." />
+                </QTreeWidget>
+
+                <QPushButton text="Collapse All" action="logic.collapse_all" />
+            </Layout>
+        </QGroupBox>
+
+        <QGroupBox title="Page Viewer" row="0" col="1">
+            <Layout type="Vertical">
+                <Layout type="Horizontal">
+                    <QLabel name="breadcrumb_label" text="Home > Select a file" />
+                    <QPushButton text="Copy Link" action="logic.copy_path" maxWidth="80" />
+                </Layout>
+
+                <HorizontalRule />
+
+                <QTextBrowser name="doc_viewer" openExternalLinks="True" />
+
+                <Layout type="Horizontal">
+                    <QLabel name="word_count" text="Words: 0" />
+                    <QProgressBar name="read_progress" value="0" textVisible="False" maxHeight="10" />
+                </Layout>
+            </Layout>
+        </QGroupBox>
+
+    </Layout>
+</App>
