@@ -1,6 +1,6 @@
 <App title="PyQt6 Master Demo - Extended Edition">
     <Import name="logic" path="./test-ui/logic.py" />
-    <Layout type="Grid">
+    <Layout type="Grid" >
 
         <QGroupBox title="Input Controls" row="0" col="0">
             <QLabel text="Standard Input:" />

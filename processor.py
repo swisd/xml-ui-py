@@ -10,6 +10,7 @@ class XMLGui(QtWidgets.QMainWindow):
         self.widgets = {}
         self.modules = {}
         self.parse_xml(xml_string)
+        self.init_func = None
     
     def _load_module(self, name, path):
         try:
@@ -21,8 +22,20 @@ class XMLGui(QtWidgets.QMainWindow):
             print(f"Error loading module {name}: {e}")
     
     def parse_xml(self, xml_string):
+        print("Parsing XML")
         root = ET.fromstring(xml_string)
         self.setWindowTitle(root.attrib.get('title', 'PyQt6 App'))
+        
+        init_attr = root.get("onInit")
+        
+        if init_attr:
+            # Split "logic.initialize_ui" -> ["logic", "initialize_ui"]
+            module_name, func_name = init_attr.split('.')
+            
+            self.init_func = (module_name, func_name)
+            # Get the function from your imported modules
+            
+
         
         for imp in root.findall('Import'):
             self._load_module(imp.attrib.get('name'), imp.attrib.get('path'))
@@ -33,6 +46,14 @@ class XMLGui(QtWidgets.QMainWindow):
             self.setCentralWidget(central_widget)
             lt_type = layout_node.attrib.get('type', 'Vertical')
             layout = QtWidgets.QGridLayout() if lt_type == 'Grid' else QtWidgets.QVBoxLayout()
+            if lt_type == 'Grid':
+                stretch_val = layout_node.attrib.get('stretch')
+                if stretch_val:
+                    print(f"strect val {stretch_val}")
+                    # Convert "3,7" into [3, 7]
+                    columns = [int(s) for s in stretch_val.split(',')]
+                    for i, s in enumerate(columns):
+                        layout.setColumnStretch(i, s)
             central_widget.setLayout(layout)
             self.build_ui(layout_node, layout)
     
@@ -47,12 +68,44 @@ class XMLGui(QtWidgets.QMainWindow):
             self.add_tree_items(item_node, new_item)
     
     def build_ui(self, parent_element, current_layout):
+        print("Building UI")
         for element in parent_element:
             tag_name = element.tag
             attrs = element.attrib
             
             # Skip non-widget tags
             if tag_name in ['Import', 'Item', 'Tab', 'Page']: continue
+            
+            # --- NEW: Handle Nested Layouts ---
+            if tag_name == 'Layout':
+                lt_type = attrs.get('type', 'Vertical')
+                if lt_type == 'Grid':
+                    new_layout = QtWidgets.QGridLayout()
+                    # --- NEW: Handle Stretch ---
+                    stretch_val = attrs.get('stretch')
+                    if stretch_val:
+                        print(f"strect val {stretch_val}")
+                        # Convert "3,7" into [3, 7]
+                        columns = [int(s) for s in stretch_val.split(',')]
+                        for i, s in enumerate(columns):
+                            new_layout.setColumnStretch(i, s)
+                            
+                elif lt_type == 'Horizontal':
+                    new_layout = QtWidgets.QHBoxLayout()
+                else:
+                    new_layout = QtWidgets.QVBoxLayout()
+                
+                # Nest the layout
+                if isinstance(current_layout, QtWidgets.QGridLayout):
+                    r, c = int(attrs.get('row', 0)), int(attrs.get('col', 0))
+                    rs, cs = int(attrs.get('rowSpan', 1)), int(attrs.get('colSpan', 1))
+                    current_layout.addLayout(new_layout, r, c, rs, cs)
+                else:
+                    current_layout.addLayout(new_layout)
+                
+                # Recursively build inside this new layout
+                self.build_ui(element, new_layout)
+                continue  # Skip the widget logic for this tag
             
             widget_class = getattr(QtWidgets, tag_name, None)
             if not widget_class or not issubclass(widget_class, QtWidgets.QWidget):
@@ -126,11 +179,18 @@ class XMLGui(QtWidgets.QMainWindow):
                 else:
                     child_layout = QtWidgets.QVBoxLayout(widget)
                     self.build_ui(element, child_layout)
+                    
+                    
+    def call_init_func(self):
+        if self.init_func is not None:
+            IF = getattr(self.modules[self.init_func[0]], self.init_func[1])
+            IF(self)
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     with open(sys.argv[1], 'r') as f:
         window = XMLGui(f.read())
+        window.call_init_func()
         window.show()
         sys.exit(app.exec())

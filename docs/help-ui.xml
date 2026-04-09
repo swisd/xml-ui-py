@@ -1,17 +1,20 @@
-<App title="Documentation Browser">
+<App title="Documentation Browser" onInit="logic.initialize_ui">
     <Import name="logic" path="./docs/help.py" />
 
-    <Layout type="Grid">
+    <Layout type="Grid" stretch="3,7">
 
         <QGroupBox title="Contents" row="0" col="0" width="300">
             <Layout type="Vertical">
                 <QLineEdit name="search_filter" placeholderText="Filter topics..." action="logic.filter_tree" />
 
-                <QTreeWidget name="help_tree" headers="Documentation Structure">
+                <QTreeWidget name="help_tree" headers="Structure">
                     <Item values="Loading Library..." />
                 </QTreeWidget>
+                <Layout type="Horizontal">
+                    <QPushButton text="Collapse All" action="logic.collapse_all" />
+                    <QPushButton text="Reload" action="logic.initialize_ui" />
+                </Layout>
 
-                <QPushButton text="Collapse All" action="logic.collapse_all" />
             </Layout>
         </QGroupBox>
 
