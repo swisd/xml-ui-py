@@ -1,5 +1,4 @@
-from tokenize import tabsize
-
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMessageBox
 #
 # def submit(ui):
@@ -43,3 +42,7 @@ def set_closable(ui):
 def set_unclosable(ui):
     tabs = ui.widgets.get('tabs')
     tabs.setTabsClosable(False)
+    
+def set_horiz_slider(ui):
+    slider = ui.widgets.get('volume_slider')
+    slider.setOrientation(Qt.Orientation.Horizontal)
