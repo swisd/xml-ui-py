@@ -7,7 +7,8 @@
             <QLineEdit name="user_in" placeholderText="Enter username..." />
 
             <QLabel text="Secure Input:" />
-            <QLineEdit name="pass_in" echoMode="Password" />
+            <QLineEdit name="pass_in" echoMode="QLineEdit.EchoMode.Password" />
+            <QPushButton name="view_pass" action="logic.set_passview" text="Hide/Show Password" />
 
             <QLabel text="Multi-line Text:" />
             <QTextEdit name="bio_editor" placeholderText="Write a short bio..." />
@@ -36,6 +37,7 @@
             <QGroupBox title="Radio Options">
                 <QRadioButton name="radio_1" text="Option A" checked="True" />
                 <QRadioButton name="radio_2" text="Option B" />
+                <QRadioButton name="radio_3" text="Option C" />
             </QGroupBox>
         </QGroupBox>
 
@@ -84,4 +86,5 @@
             </Tab>
         </QTabWidget>
     </Layout>
+    <QStatusBar name="status_bar" />
 </App>

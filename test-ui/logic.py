@@ -1,5 +1,7 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox, QLineEdit
+
+
 #
 # def submit(ui):
 #     name = ui.widgets['name_in'].text()
@@ -46,3 +48,11 @@ def set_unclosable(ui):
 def set_horiz_slider(ui):
     slider = ui.widgets.get('volume_slider')
     slider.setOrientation(Qt.Orientation.Horizontal)
+    
+def set_passview(ui):
+    textbox = ui.widgets.get('pass_in')
+    echmode = textbox.echoMode()
+    if echmode == QLineEdit.EchoMode.Normal:
+     textbox.setEchoMode(QLineEdit.EchoMode.Password)
+    else:
+     textbox.setEchoMode(QLineEdit.EchoMode.Normal)
